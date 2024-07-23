@@ -8,6 +8,7 @@ import left_d_icon from '../../assets/icons/chevron-d-left.svg'
 import AvailableList from "./available-list"
 import IncludedList from "./included-list"
 import { v4 as uuidv4 } from 'uuid'
+import AddSubstrate from "./add-substrate"
 
 const carriers = [
   {
@@ -72,6 +73,8 @@ const Material = () => {
   const [selectedHeaders, setSelectedHeaders] = useState([])
   const [selectedItems, setSelectedItems] = useState({})
 
+  const [openAddDialog, setOpenAddDialog] = useState(false)
+
   const moveAllToIncluded = () => {
     setIncludedList([...includedList, ...availableList])
     setAvailableList([])
@@ -131,7 +134,8 @@ const Material = () => {
         
         <div className="flex justify-between">
           <h6>Substrate</h6>
-          <button className="btn-contained">Add</button>
+          <button onClick={() => setOpenAddDialog(true)} className="btn-contained">Add</button>
+          {openAddDialog && <AddSubstrate open={openAddDialog} setOpen={setOpenAddDialog} setData={setAvailableList}/>}
         </div>
 
         <div className="h-full flex flex-col lg:flex-row justify-between mt-4 gap-x-4">

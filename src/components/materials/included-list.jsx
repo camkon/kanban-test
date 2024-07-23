@@ -33,7 +33,7 @@ const IncludedList = ({ items }) => {
 
             </div>
             <div
-              className={`accordion-items pl-10 pb-3 border-b-2 bg-gray-50 text-gray-800 ${
+              className={`accordion-items pl-10 py-1 border-b-2 bg-gray-50 text-gray-800 ${
                 openIndexes.includes(index) ? '' : 'hidden'
               }`}
             >

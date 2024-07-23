@@ -1,12 +1,12 @@
 .container-width {
-  width: 80dvw;
+  width: 60dvw;
   overflow-y: hidden;
 }
 
 @media screen and (max-width: 800px) {
   .container-width {
     width: 90dvw;
-    height: 80dvh;
+    height: 90dvh;
     overflow-y: scroll;
   }
 }
@@ -38,4 +38,20 @@
 }
 .icon-btn-contained:hover {
   background-color: #3f3f46;
+}
+
+.icon-btn-contained-small {
+  height: 2rem;
+  width: 2rem;
+  padding: 0;
+  border-radius: 0.5rem;
+  box-sizing: border-box;
+  background-color: #e2e8f0;
+  color: #fff;
+  text-transform: none;
+  font-size: 0.9rem;
+  transition: all 0.2s ease-in-out;
+}
+.icon-btn-contained-small:hover {
+  background-color: #bdc1c6;
 }
