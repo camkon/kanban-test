@@ -1,0 +1,41 @@
+.container-width {
+  width: 80dvw;
+  overflow-y: hidden;
+}
+
+@media screen and (max-width: 800px) {
+  .container-width {
+    width: 90dvw;
+    height: 80dvh;
+    overflow-y: scroll;
+  }
+}
+
+.btn-contained {
+  padding: 0.3rem 0.6rem;
+  border-radius: 0.5rem;
+  box-shadow: 1px 1px 5px 2px #ddd;
+  background-color: #27272a;
+  color: #fff;
+  text-transform: none;
+  font-size: 0.9rem;
+  transition: all 0.2s ease-in-out;
+}
+.btn-contained:hover {
+  background-color: #3f3f46;
+}
+
+.icon-btn-contained {
+  padding: 0.25rem 0;
+  border-radius: 0.5rem;
+  box-sizing: border-box;
+  box-shadow: 1px 1px 5px 2px #ddd;
+  background-color: #27272a;
+  color: #fff;
+  text-transform: none;
+  font-size: 0.9rem;
+  transition: all 0.2s ease-in-out;
+}
+.icon-btn-contained:hover {
+  background-color: #3f3f46;
+}
