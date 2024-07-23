@@ -76,8 +76,35 @@ const Material = () => {
   const [openAddDialog, setOpenAddDialog] = useState(false)
 
   const moveAllToIncluded = () => {
-    setIncludedList([...includedList, ...availableList])
+    const mergedListCopy = [...includedList];
+  
+    availableList.forEach((selectedItem) => {
+      const headerToUpdate = mergedListCopy.find(
+        (header) => header.id === selectedItem.id
+      );
+  
+      if (headerToUpdate) {
+        selectedItem.items.forEach((selectedItemId) => {
+          if (!headerToUpdate.items.includes(selectedItemId)) {
+            headerToUpdate.items.push(selectedItemId);
+          }
+        });
+      } else {
+        const newHeader = {
+          id: selectedItem.id,
+          name: selectedItem.name,
+          items: selectedItem.items.map((itemId) => itemId),
+        };
+
+        mergedListCopy.push(newHeader);
+      }
+    });
+  
+    setIncludedList(mergedListCopy)
     setAvailableList([])
+    setTempList([])
+    setSelectedHeaders([])
+    setSelectedItems({})
   }
 
   const moveToIncluded = () => {
@@ -156,7 +183,7 @@ const Material = () => {
           <div className="flex flex-row lg:flex-col h-full py-8 lg:py-24 items-center justify-center gap-3 px-2">
             <button onClick={moveToIncluded} className="icon-btn-contained"><img className="h-6 w-20 rotate-90 lg:rotate-0" src={right_icon} alt="right icon" /></button>
             <button disabled className="icon-btn-contained bg-zinc-500 hover:bg-zinc-500"><img className="h-6 w-20 rotate-90 lg:rotate-0" src={left_icon} alt="left icon" /></button>
-            <button disabled onClick={moveAllToIncluded} className="icon-btn-contained bg-zinc-500 hover:bg-zinc-500 mt-0 ml-4 lg:ml-0 lg:mt-4"><img className="h-6 w-20  rotate-90 lg:rotate-0" src={right_d_icon} alt=" double right icon" /></button>
+            <button onClick={moveAllToIncluded} className="icon-btn-contained mt-0 ml-4 lg:ml-0 lg:mt-4"><img className="h-6 w-20  rotate-90 lg:rotate-0" src={right_d_icon} alt=" double right icon" /></button>
             <button disabled className="icon-btn-contained bg-zinc-500 hover:bg-zinc-500"><img className="h-6 w-20 rotate-90 lg:rotate-0" src={left_d_icon} alt=" double left icon" /></button>
           </div>
           
