@@ -15,33 +15,33 @@ const carriers = [
     id: 1,
     name: "Carrier 1",
     items: [
-      {id: 13, name: "Carrier 1.3"},
+      {id: 13, name: "Signal 1.3"},
     ]
   },
   {
     id: 2,
     name: "Carrier 2",
     items: [
-      {id: 21, name: "Carrier 2.1"},
-      {id: 23, name: "Carrier 2.3"},
+      {id: 21, name: "Signal 2.1"},
+      {id: 23, name: "Signal 2.3"},
     ]
   },
   {
     id: 3,
     name: "Carrier 3",
     items: [
-      {id: 31, name: "Carrier 3.1"},
-      {id: 32, name: "Carrier 3.2"},
-      {id: 33, name: "Carrier 3.3"},
+      {id: 31, name: "Signal 3.1"},
+      {id: 32, name: "Signal 3.2"},
+      {id: 33, name: "Signal 3.3"},
     ]
   },
   {
     id: 4,
     name: "Carrier 4",
     items: [
-      {id: 41, name: "Carrier 4.1"},
-      {id: 42, name: "Carrier 4.2"},
-      {id: 43, name: "Carrier 4.3"},
+      {id: 41, name: "Signal 4.1"},
+      {id: 42, name: "Signal 4.2"},
+      {id: 43, name: "Signal 4.3"},
     ]
   },
 ]
@@ -51,15 +51,15 @@ const includes = [
     id: 1,
     name: "Carrier 1",
     items: [
-      {id: 11, name: "Carrier 1.1"},
-      {id: 12, name: "Carrier 1.2"},
+      {id: 11, name: "Signal 1.1"},
+      {id: 12, name: "Signal 1.2"},
     ]
   },
   {
     id: 2,
     name: "Carrier 2",
     items: [
-      {id: 22, name: "Carrier 2.2"},
+      {id: 22, name: "Signal 2.2"},
     ]
   }
 ]
@@ -70,42 +70,13 @@ const Material = () => {
   const [tempList, setTempList] = useState([])  // to be used to update the included list
   const [includedList, setIncludedList] = useState(includes) // to be fetched from the API
  
-  const [selectedHeaders, setSelectedHeaders] = useState([])
-  const [selectedItems, setSelectedItems] = useState({})
+  const [selectedHeadersAvail, setSelectedHeadersAvail] = useState([])
+  const [selectedItemsAvail, setSelectedItemsAvail] = useState({})
+
+  const [selectedHeadersInclude, setSelectedHeadersInclude] = useState([])
+  const [selectedItemsInclude, setSelectedItemsInclude] = useState({})
 
   const [openAddDialog, setOpenAddDialog] = useState(false)
-
-  const moveAllToIncluded = () => {
-    const mergedListCopy = [...includedList];
-  
-    availableList.forEach((selectedItem) => {
-      const headerToUpdate = mergedListCopy.find(
-        (header) => header.id === selectedItem.id
-      );
-  
-      if (headerToUpdate) {
-        selectedItem.items.forEach((selectedItemId) => {
-          if (!headerToUpdate.items.includes(selectedItemId)) {
-            headerToUpdate.items.push(selectedItemId);
-          }
-        });
-      } else {
-        const newHeader = {
-          id: selectedItem.id,
-          name: selectedItem.name,
-          items: selectedItem.items.map((itemId) => itemId),
-        };
-
-        mergedListCopy.push(newHeader);
-      }
-    });
-  
-    setIncludedList(mergedListCopy)
-    setAvailableList([])
-    setTempList([])
-    setSelectedHeaders([])
-    setSelectedItems({})
-  }
 
   const moveToIncluded = () => {
     const mergedListCopy = [...includedList];
@@ -149,9 +120,119 @@ const Material = () => {
     setIncludedList(mergedListCopy)
     setAvailableList(updatedAvailableListFinal)
     setTempList([])
-    setSelectedHeaders([])
-    setSelectedItems({})
+    setSelectedHeadersAvail([])
+    setSelectedItemsAvail({})
   };
+
+  const moveToAvailable = () => {
+    const mergedListCopy = [...availableList];
+  
+    const itemsToRemove = []; // to update the available list
+  
+    tempList.forEach((selectedItem) => {
+      const headerToUpdate = mergedListCopy.find(
+        (header) => header.id === selectedItem.id
+      );
+  
+      if (headerToUpdate) {
+        selectedItem.items.forEach((selectedItemId) => {
+          if (!headerToUpdate.items.includes(selectedItemId)) {
+            headerToUpdate.items.push(selectedItemId);
+          }
+        });
+      } else {
+        const newHeader = {
+          id: selectedItem.id,
+          name: selectedItem.name,
+          items: selectedItem.items.map((itemId) => itemId),
+        };
+
+        mergedListCopy.push(newHeader);
+      }
+  
+      itemsToRemove.push(...selectedItem?.items?.map((itemId) => itemId.id));
+    });
+  
+    // removing the nested items
+    const updatedIncludedList = includedList.map(
+      (item) => ({...item, items: item.items.filter((itemId) => !itemsToRemove.includes(itemId.id))})
+    ).flat();
+
+    // removing the headers with no items
+    const updatedIncludedListFinal = updatedIncludedList.filter(
+      (item) => item.items.length > 0
+    );
+
+    setAvailableList(mergedListCopy)
+    setIncludedList(updatedIncludedListFinal)
+    setTempList([])
+    setSelectedHeadersInclude([])
+    setSelectedItemsInclude({})
+  };
+
+  const moveAllToIncluded = () => {
+    const mergedListCopy = [...includedList];
+  
+    availableList.forEach((selectedItem) => {
+      const headerToUpdate = mergedListCopy.find(
+        (header) => header.id === selectedItem.id
+      );
+  
+      if (headerToUpdate) {
+        selectedItem.items.forEach((selectedItemId) => {
+          if (!headerToUpdate.items.includes(selectedItemId)) {
+            headerToUpdate.items.push(selectedItemId);
+          }
+        });
+      } else {
+        const newHeader = {
+          id: selectedItem.id,
+          name: selectedItem.name,
+          items: selectedItem.items.map((itemId) => itemId),
+        };
+
+        mergedListCopy.push(newHeader);
+      }
+    });
+  
+    setIncludedList(mergedListCopy)
+    setAvailableList([])
+    setTempList([])
+    setSelectedHeadersAvail([])
+    setSelectedItemsAvail({})
+  }
+
+  const moveAllToAvailable = () => {
+    const mergedListCopy = [...availableList];
+  
+    includedList.forEach((selectedItem) => {
+      const headerToUpdate = mergedListCopy.find(
+        (header) => header.id === selectedItem.id
+      );
+  
+      if (headerToUpdate) {
+        selectedItem.items.forEach((selectedItemId) => {
+          if (!headerToUpdate.items.includes(selectedItemId)) {
+            headerToUpdate.items.push(selectedItemId);
+          }
+        });
+      } else {
+        const newHeader = {
+          id: selectedItem.id,
+          name: selectedItem.name,
+          items: selectedItem.items.map((itemId) => itemId),
+        };
+
+        mergedListCopy.push(newHeader);
+      }
+    });
+  
+    setAvailableList(mergedListCopy)
+    setIncludedList([])
+    setTempList([])
+    setSelectedHeadersInclude([])
+    setSelectedItemsInclude({})
+  }
 
   return(
     <div className="container-width bg-white rounded-xl lg:drop-shadow-lg">
@@ -172,25 +253,34 @@ const Material = () => {
               {<AvailableList 
                 items={availableList} 
                 setData={setTempList} 
-                selectedHeaders={selectedHeaders} 
-                setSelectedHeaders={setSelectedHeaders} 
-                selectedItems={selectedItems} 
-                setSelectedItems={setSelectedItems} 
+                selectedHeaders={selectedHeadersAvail} 
+                setSelectedHeaders={setSelectedHeadersAvail} 
+                selectedItems={selectedItemsAvail} 
+                setSelectedItems={setSelectedItemsAvail} 
               />}
             </div>
           </div>
 
           <div className="flex flex-row lg:flex-col h-full py-8 lg:py-24 items-center justify-center gap-3 px-2">
             <button onClick={moveToIncluded} className="icon-btn-contained"><img className="h-6 w-20 rotate-90 lg:rotate-0" src={right_icon} alt="right icon" /></button>
-            <button disabled className="icon-btn-contained bg-zinc-500 hover:bg-zinc-500"><img className="h-6 w-20 rotate-90 lg:rotate-0" src={left_icon} alt="left icon" /></button>
+            <button onClick={moveToAvailable} className="icon-btn-contained"><img className="h-6 w-20 rotate-90 lg:rotate-0" src={left_icon} alt="left icon" /></button>
             <button onClick={moveAllToIncluded} className="icon-btn-contained mt-0 ml-4 lg:ml-0 lg:mt-4"><img className="h-6 w-20  rotate-90 lg:rotate-0" src={right_d_icon} alt=" double right icon" /></button>
-            <button disabled className="icon-btn-contained bg-zinc-500 hover:bg-zinc-500"><img className="h-6 w-20 rotate-90 lg:rotate-0" src={left_d_icon} alt=" double left icon" /></button>
+            <button onClick={moveAllToAvailable} className="icon-btn-contained"><img className="h-6 w-20 rotate-90 lg:rotate-0" src={left_d_icon} alt=" double left icon" /></button>
           </div>
           
           <div className="border w-full rounded-lg">
             <p className="border-b px-3 py-2">Included</p>
             <div className="overflow-y-scroll h-56 lg:h-80">
-              {includedList.length > 0 && <IncludedList items={includedList}/>}
+              {/* {includedList.length > 0 && <IncludedList items={includedList}/>} */}
+              {<AvailableList 
+                items={includedList} 
+                setData={setTempList} 
+                selectedHeaders={selectedHeadersInclude} 
+                setSelectedHeaders={setSelectedHeadersInclude} 
+                selectedItems={selectedItemsInclude} 
+                setSelectedItems={setSelectedItemsInclude} 
+              />}
+
             </div>
           </div>
         </div>
