@@ -1,13 +1,11 @@
 import "./index.css"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 import right_icon from '../../assets/icons/chevron-right.svg'
 import right_d_icon from '../../assets/icons/chevron-d-right.svg'
 import left_icon from '../../assets/icons/chevron-left.svg'
 import left_d_icon from '../../assets/icons/chevron-d-left.svg'
 import AvailableList from "./available-list"
-import IncludedList from "./included-list"
-import { v4 as uuidv4 } from 'uuid'
 import AddSubstrate from "./add-substrate"
 
 const carriers = [
@@ -78,13 +76,11 @@ const Material = () => {
 
   const [openAddDialog, setOpenAddDialog] = useState(false)
 
-  const moveToIncluded = () => {
-    const mergedListCopy = [...includedList];
-  
-    const itemsToRemove = []; // to update the available list
-  
-    tempList.forEach((selectedItem) => {
-      const headerToUpdate = mergedListCopy.find(
+  const moveCarriers = (toList, fromList) => {
+    const mergedList = [...toList];
+    
+    fromList.forEach((selectedItem) => {
+      const headerToUpdate = mergedList.find(
         (header) => header.id === selectedItem.id
       );
   
@@ -101,137 +97,101 @@ const Material = () => {
           items: selectedItem.items.map((itemId) => itemId),
         };
 
-        mergedListCopy.push(newHeader);
+        mergedList.push(newHeader);
+      }
+    });
+    
+    return {
+      mergedList,
+    }
+  }
+  
+  const moveSignals = (toList, fromList) => {
+    const mergedList = [...toList];
+  
+    const itemsToRemove = []; // to update the available list
+  
+    tempList.forEach((selectedItem) => {
+      const headerToUpdate = mergedList.find(
+        (header) => header.id === selectedItem.id
+      );
+  
+      if (headerToUpdate) {
+        selectedItem.items.forEach((selectedItemId) => {
+          if (!headerToUpdate.items.includes(selectedItemId)) {
+            headerToUpdate.items.push(selectedItemId);
+          }
+        });
+      } else {
+        const newHeader = {
+          id: selectedItem.id,
+          name: selectedItem.name,
+          items: selectedItem.items.map((itemId) => itemId),
+        };
+
+        mergedList.push(newHeader);
       }
   
       itemsToRemove.push(...selectedItem?.items?.map((itemId) => itemId.id));
     });
   
     // removing the nested items
-    const updatedAvailableList = availableList.map(
+    const filteredFromList = fromList.map(
       (item) => ({...item, items: item.items.filter((itemId) => !itemsToRemove.includes(itemId.id))})
     ).flat();
 
     // removing the headers with no items
-    const updatedAvailableListFinal = updatedAvailableList.filter(
+    const updatedFromList = filteredFromList.filter(
       (item) => item.items.length > 0
     );
+    
+    return {
+      mergedList,
+      updatedFromList
+    }
+  }
 
-    setIncludedList(mergedListCopy)
-    setAvailableList(updatedAvailableListFinal)
+  const clearAll = ({toInclude}) => {
     setTempList([])
-    setSelectedHeadersAvail([])
-    setSelectedItemsAvail({})
-  };
+    if(toInclude) {
+      setSelectedHeadersAvail([])
+      setSelectedItemsAvail({})
+    }else{
+      setSelectedHeadersInclude([])
+      setSelectedItemsInclude({})  
+    }
+  }
+
+  const moveToIncluded = () => {
+    const {mergedList, updatedFromList} = moveSignals(includedList, availableList)
+
+    setIncludedList(mergedList)
+    setAvailableList(updatedFromList)
+    clearAll({toInclude: true})
+  }
 
   const moveToAvailable = () => {
-    const mergedListCopy = [...availableList];
-  
-    const itemsToRemove = []; // to update the available list
-  
-    tempList.forEach((selectedItem) => {
-      const headerToUpdate = mergedListCopy.find(
-        (header) => header.id === selectedItem.id
-      );
-  
-      if (headerToUpdate) {
-        selectedItem.items.forEach((selectedItemId) => {
-          if (!headerToUpdate.items.includes(selectedItemId)) {
-            headerToUpdate.items.push(selectedItemId);
-          }
-        });
-      } else {
-        const newHeader = {
-          id: selectedItem.id,
-          name: selectedItem.name,
-          items: selectedItem.items.map((itemId) => itemId),
-        };
+    const {mergedList, updatedFromList} = moveSignals(availableList, includedList)
 
-        mergedListCopy.push(newHeader);
-      }
-  
-      itemsToRemove.push(...selectedItem?.items?.map((itemId) => itemId.id));
-    });
-  
-    // removing the nested items
-    const updatedIncludedList = includedList.map(
-      (item) => ({...item, items: item.items.filter((itemId) => !itemsToRemove.includes(itemId.id))})
-    ).flat();
-
-    // removing the headers with no items
-    const updatedIncludedListFinal = updatedIncludedList.filter(
-      (item) => item.items.length > 0
-    );
-
-    setAvailableList(mergedListCopy)
-    setIncludedList(updatedIncludedListFinal)
-    setTempList([])
-    setSelectedHeadersInclude([])
-    setSelectedItemsInclude({})
-  };
+    setAvailableList(mergedList)
+    setIncludedList(updatedFromList)
+    clearAll({toInclude: false})
+  }
 
   const moveAllToIncluded = () => {
-    const mergedListCopy = [...includedList];
-  
-    availableList.forEach((selectedItem) => {
-      const headerToUpdate = mergedListCopy.find(
-        (header) => header.id === selectedItem.id
-      );
-  
-      if (headerToUpdate) {
-        selectedItem.items.forEach((selectedItemId) => {
-          if (!headerToUpdate.items.includes(selectedItemId)) {
-            headerToUpdate.items.push(selectedItemId);
-          }
-        });
-      } else {
-        const newHeader = {
-          id: selectedItem.id,
-          name: selectedItem.name,
-          items: selectedItem.items.map((itemId) => itemId),
-        };
-
-        mergedListCopy.push(newHeader);
-      }
-    });
-  
-    setIncludedList(mergedListCopy)
+    const {mergedList} = moveCarriers(includedList, availableList)
+    
+    setIncludedList(mergedList)
     setAvailableList([])
-    setTempList([])
-    setSelectedHeadersAvail([])
-    setSelectedItemsAvail({})
+    clearAll({toInclude: true})
   }
 
   const moveAllToAvailable = () => {
-    const mergedListCopy = [...availableList];
-  
-    includedList.forEach((selectedItem) => {
-      const headerToUpdate = mergedListCopy.find(
-        (header) => header.id === selectedItem.id
-      );
-  
-      if (headerToUpdate) {
-        selectedItem.items.forEach((selectedItemId) => {
-          if (!headerToUpdate.items.includes(selectedItemId)) {
-            headerToUpdate.items.push(selectedItemId);
-          }
-        });
-      } else {
-        const newHeader = {
-          id: selectedItem.id,
-          name: selectedItem.name,
-          items: selectedItem.items.map((itemId) => itemId),
-        };
-
-        mergedListCopy.push(newHeader);
-      }
-    });
-  
-    setAvailableList(mergedListCopy)
+    const {mergedList} = moveCarriers(availableList, includedList)
+    
+    setAvailableList(mergedList)
     setIncludedList([])
-    setTempList([])
-    setSelectedHeadersInclude([])
-    setSelectedItemsInclude({})
+    clearAll({toInclude: false})
   }
 
   return(
